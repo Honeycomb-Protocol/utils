@@ -4,11 +4,11 @@ use {
         self,
         instruction::{
             builders::{
-                CreateBuilder, DelegateBuilder, LockBuilder, MintBuilder, RevokeBuilder,
-                TransferBuilder, UnlockBuilder, UpdateBuilder,
+                BurnBuilder, CreateBuilder, DelegateBuilder, LockBuilder, MintBuilder,
+                RevokeBuilder, TransferBuilder, UnlockBuilder, UpdateBuilder, VerifyBuilder,
             },
-            CreateArgs, DelegateArgs, InstructionBuilder, LockArgs, MintArgs, RevokeArgs,
-            TransferArgs, UnlockArgs, UpdateArgs,
+            BurnArgs, CreateArgs, DelegateArgs, InstructionBuilder, LockArgs, MintArgs, RevokeArgs,
+            TransferArgs, UnlockArgs, UpdateArgs, VerificationArgs,
         },
         state::{AssetData, PrintSupply},
     },
@@ -174,6 +174,92 @@ pub fn mint<'info>(
             .map_err(Into::into);
     } else {
         return solana_program::program::invoke(&mint_ix, &account_infos[..]).map_err(Into::into);
+    }
+}
+
+pub fn burn<'info>(
+    args: BurnArgs,
+    authority: AccountInfo<'info>,
+    collection_metadata: Option<AccountInfo<'info>>,
+    metadata: AccountInfo<'info>,
+    edition: Option<AccountInfo<'info>>,
+    mint: AccountInfo<'info>,
+    token: AccountInfo<'info>,
+    master_edition: Option<AccountInfo<'info>>,
+    master_edition_mint: Option<AccountInfo<'info>>,
+    master_edition_token: Option<AccountInfo<'info>>,
+    edition_marker: Option<AccountInfo<'info>>,
+    token_record: Option<AccountInfo<'info>>,
+    system_program: AccountInfo<'info>,
+    sysvar_instructions: AccountInfo<'info>,
+    spl_token_program: AccountInfo<'info>,
+    signer_seeds: Option<&[&[&[u8]]; 1]>,
+) -> Result<()> {
+    let mut binding = BurnBuilder::new();
+
+    let burn_builder = binding
+        .authority(authority.key())
+        .metadata(metadata.key())
+        .mint(mint.key())
+        .token(token.key())
+        .system_program(system_program.key())
+        .sysvar_instructions(sysvar_instructions.key())
+        .spl_token_program(spl_token_program.key());
+
+    let mut account_infos = vec![authority];
+
+    if let Some(collection_metadata) = collection_metadata {
+        burn_builder.collection_metadata(collection_metadata.key());
+        account_infos.push(collection_metadata);
+    }
+
+    account_infos = [account_infos, vec![metadata]].concat();
+
+    if let Some(edition) = edition {
+        burn_builder.edition(edition.key());
+        account_infos.push(edition);
+    }
+
+    account_infos = [account_infos, vec![mint, token]].concat();
+
+    if let Some(master_edition) = master_edition {
+        burn_builder.master_edition(master_edition.key());
+        account_infos.push(master_edition);
+    }
+
+    if let Some(master_edition_mint) = master_edition_mint {
+        burn_builder.master_edition_mint(master_edition_mint.key());
+        account_infos.push(master_edition_mint);
+    }
+
+    if let Some(master_edition_token) = master_edition_token {
+        burn_builder.master_edition_token(master_edition_token.key());
+        account_infos.push(master_edition_token);
+    }
+
+    if let Some(edition_marker) = edition_marker {
+        burn_builder.edition_marker(edition_marker.key());
+        account_infos.push(edition_marker);
+    }
+
+    if let Some(token_record) = token_record {
+        burn_builder.token_record(token_record.key());
+        account_infos.push(token_record);
+    }
+
+    account_infos = [
+        account_infos,
+        vec![system_program, sysvar_instructions, spl_token_program],
+    ]
+    .concat();
+
+    let burn_ix = burn_builder.build(args).unwrap().instruction();
+
+    if let Some(signer_seeds) = signer_seeds {
+        return solana_program::program::invoke_signed(&burn_ix, &account_infos[..], signer_seeds)
+            .map_err(Into::into);
+    } else {
+        return solana_program::program::invoke(&burn_ix, &account_infos[..]).map_err(Into::into);
     }
 }
 
@@ -613,5 +699,64 @@ pub fn revoke<'info>(
         .map_err(Into::into);
     } else {
         return solana_program::program::invoke(&revoke_ix, &account_infos[..]).map_err(Into::into);
+    }
+}
+
+pub fn verify<'info>(
+    args: VerificationArgs,
+    authority: AccountInfo<'info>,
+    delegate_record: Option<AccountInfo<'info>>,
+    metadata: AccountInfo<'info>,
+    collection_mint: Option<AccountInfo<'info>>,
+    collection_metadata: Option<AccountInfo<'info>>,
+    collection_master_edition: Option<AccountInfo<'info>>,
+    system_program: AccountInfo<'info>,
+    sysvar_instructions: AccountInfo<'info>,
+    signer_seeds: Option<&[&[&[u8]]; 1]>,
+) -> Result<()> {
+    let mut binding = VerifyBuilder::new();
+    let verify_builder = binding
+        .authority(authority.key())
+        .metadata(metadata.key())
+        .system_program(system_program.key())
+        .sysvar_instructions(sysvar_instructions.key());
+
+    let mut account_infos = vec![authority];
+
+    if let Some(delegate_record) = delegate_record {
+        verify_builder.delegate_record(delegate_record.key());
+        account_infos.push(delegate_record);
+    }
+
+    account_infos = [account_infos, vec![metadata]].concat();
+
+    if let Some(collection_mint) = collection_mint {
+        verify_builder.collection_mint(collection_mint.key());
+        account_infos.push(collection_mint);
+    }
+
+    if let Some(collection_metadata) = collection_metadata {
+        verify_builder.collection_metadata(collection_metadata.key());
+        account_infos.push(collection_metadata);
+    }
+
+    if let Some(collection_master_edition) = collection_master_edition {
+        verify_builder.collection_master_edition(collection_master_edition.key());
+        account_infos.push(collection_master_edition);
+    }
+
+    account_infos = [account_infos, vec![system_program, sysvar_instructions]].concat();
+
+    let verify_ix = verify_builder.build(args).unwrap().instruction();
+
+    if let Some(signer_seeds) = signer_seeds {
+        return solana_program::program::invoke_signed(
+            &verify_ix,
+            &account_infos[..],
+            signer_seeds,
+        )
+        .map_err(Into::into);
+    } else {
+        return solana_program::program::invoke(&verify_ix, &account_infos[..]).map_err(Into::into);
     }
 }

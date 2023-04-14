@@ -2,7 +2,7 @@
 name = "hpl-utils"
 description = "utilities to be used accross honeycomb protocol library"
 authors = ["Sultan Nadeem <sultanndilaram@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,4 +13,4 @@ path = "src/lib.rs"
 
 [dependencies]
 anchor-lang = "0.26.0"
-mpl-token-metadata = { version="1.8.0", features = [ "no-entrypoint" ] }
+mpl-token-metadata = { version="1.9.0", features = [ "no-entrypoint" ] }
