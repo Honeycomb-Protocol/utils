@@ -342,6 +342,8 @@ pub fn transfer<'info>(
     token_program: AccountInfo<'info>,
     associated_token_program: AccountInfo<'info>,
     sysvar_instructions: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = TransferBuilder::new();
@@ -396,6 +398,16 @@ pub fn transfer<'info>(
     ]
     .concat();
 
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        transfer_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        transfer_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
+
     let transfer_ix = transfer_builder
         .build(TransferArgs::V1 {
             amount,
@@ -429,6 +441,8 @@ pub fn lock<'info>(
     system_program: AccountInfo<'info>,
     sysvar_instructions: AccountInfo<'info>,
     token_program: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = LockBuilder::new();
@@ -467,6 +481,16 @@ pub fn lock<'info>(
     ]
     .concat();
 
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        lock_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        lock_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
+
     let lock_ix = lock_builder
         .build(LockArgs::V1 {
             authorization_data: None,
@@ -494,6 +518,8 @@ pub fn unlock<'info>(
     system_program: AccountInfo<'info>,
     sysvar_instructions: AccountInfo<'info>,
     token_program: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = UnlockBuilder::new();
@@ -532,6 +558,16 @@ pub fn unlock<'info>(
     ]
     .concat();
 
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        unlock_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        unlock_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
+
     let unlock_ix = unlock_builder
         .build(UnlockArgs::V1 {
             authorization_data: None,
@@ -565,6 +601,8 @@ pub fn delegate<'info>(
     system_program: AccountInfo<'info>,
     sysvar_instructions: AccountInfo<'info>,
     token_program: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = DelegateBuilder::new();
@@ -612,6 +650,16 @@ pub fn delegate<'info>(
     ]
     .concat();
 
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        delegate_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        delegate_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
+
     let delegate_ix = delegate_builder.build(args).unwrap().instruction();
 
     if let Some(signer_seeds) = signer_seeds {
@@ -641,6 +689,8 @@ pub fn revoke<'info>(
     system_program: AccountInfo<'info>,
     sysvar_instructions: AccountInfo<'info>,
     token_program: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = RevokeBuilder::new();
@@ -687,6 +737,16 @@ pub fn revoke<'info>(
         ],
     ]
     .concat();
+
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        revoke_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        revoke_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
 
     let revoke_ix = revoke_builder.build(args).unwrap().instruction();
 
