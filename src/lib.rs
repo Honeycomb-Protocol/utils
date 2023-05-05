@@ -1,5 +1,6 @@
 pub mod bpf_writer;
 pub mod errors;
+pub mod merkle_tree;
 pub mod metadata;
 pub mod traits;
 
