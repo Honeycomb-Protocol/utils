@@ -116,7 +116,7 @@ pub fn create<'info>(
 pub fn mint<'info>(
     args: MintArgs,
     token: AccountInfo<'info>,
-    token_owner: AccountInfo<'info>,
+    token_owner: Option<AccountInfo<'info>>,
     metadata: AccountInfo<'info>,
     master_edition: Option<AccountInfo<'info>>,
     token_record: Option<AccountInfo<'info>>,
@@ -128,13 +128,14 @@ pub fn mint<'info>(
     sysvar_instructions: AccountInfo<'info>,
     spl_token_program: AccountInfo<'info>,
     spl_ata_program: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = MintBuilder::new();
 
     let mint_builder = binding
         .token(token.key())
-        .token_owner(token_owner.key())
         .metadata(metadata.key())
         .mint(mint.key())
         .authority(authority.key())
@@ -144,7 +145,14 @@ pub fn mint<'info>(
         .spl_token_program(spl_token_program.key())
         .spl_ata_program(spl_ata_program.key());
 
-    let mut account_infos = vec![token, token_owner, metadata];
+    let mut account_infos = vec![token];
+
+    if let Some(token_owner) = token_owner {
+        mint_builder.token_owner(token_owner.key());
+        account_infos.push(token_owner);
+    }
+
+    account_infos = [account_infos, vec![metadata]].concat();
 
     if let Some(master_edition) = master_edition {
         mint_builder.master_edition(master_edition.key());
@@ -174,6 +182,16 @@ pub fn mint<'info>(
         ],
     ]
     .concat();
+
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        mint_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        mint_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
 
     let mint_ix = mint_builder.build(args).unwrap().instruction();
 
@@ -441,7 +459,7 @@ pub fn lock<'info>(
     authority: AccountInfo<'info>,
     token_mint: AccountInfo<'info>,
     token_account: AccountInfo<'info>,
-    token_account_owner: AccountInfo<'info>,
+    token_account_owner: Option<AccountInfo<'info>>,
     token_metadata: AccountInfo<'info>,
     token_edition: Option<AccountInfo<'info>>,
     token_record: Option<AccountInfo<'info>>,
@@ -456,7 +474,6 @@ pub fn lock<'info>(
     let mut binding = LockBuilder::new();
     let lock_builder = binding
         .authority(authority.key())
-        .token_owner(token_account_owner.key())
         .token(token_account.key())
         .mint(token_mint.key())
         .metadata(token_metadata.key())
@@ -465,13 +482,18 @@ pub fn lock<'info>(
         .sysvar_instructions(sysvar_instructions.key())
         .spl_token_program(token_program.key());
 
-    let mut account_infos = vec![
-        authority,
-        token_account_owner,
-        token_account,
-        token_mint,
-        token_metadata,
-    ];
+    let mut account_infos = vec![authority];
+
+    if let Some(token_account_owner) = token_account_owner {
+        lock_builder.token_owner(token_account_owner.key());
+        account_infos.push(token_account_owner);
+    }
+
+    account_infos = [
+        account_infos,
+        vec![token_account, token_mint, token_metadata],
+    ]
+    .concat();
 
     if let Some(token_edition) = token_edition {
         lock_builder.edition(token_edition.key());
@@ -518,7 +540,7 @@ pub fn unlock<'info>(
     authority: AccountInfo<'info>,
     token_mint: AccountInfo<'info>,
     token_account: AccountInfo<'info>,
-    token_account_owner: AccountInfo<'info>,
+    token_account_owner: Option<AccountInfo<'info>>,
     token_metadata: AccountInfo<'info>,
     token_edition: Option<AccountInfo<'info>>,
     token_record: Option<AccountInfo<'info>>,
@@ -533,7 +555,6 @@ pub fn unlock<'info>(
     let mut binding = UnlockBuilder::new();
     let unlock_builder = binding
         .authority(authority.key())
-        .token_owner(token_account_owner.key())
         .token(token_account.key())
         .mint(token_mint.key())
         .metadata(token_metadata.key())
@@ -542,13 +563,18 @@ pub fn unlock<'info>(
         .sysvar_instructions(sysvar_instructions.key())
         .spl_token_program(token_program.key());
 
-    let mut account_infos = vec![
-        authority,
-        token_account_owner,
-        token_account,
-        token_mint,
-        token_metadata,
-    ];
+    let mut account_infos = vec![authority];
+
+    if let Some(token_account_owner) = token_account_owner {
+        unlock_builder.token_owner(token_account_owner.key());
+        account_infos.push(token_account_owner);
+    }
+
+    account_infos = [
+        account_infos,
+        vec![token_account, token_mint, token_metadata],
+    ]
+    .concat();
 
     if let Some(token_edition) = token_edition {
         unlock_builder.edition(token_edition.key());
