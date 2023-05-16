@@ -38,7 +38,7 @@ pub fn create_nft<'info>(
         initialize_mint,
         update_authority_as_signer,
         metadata,
-        master_edition,
+        Some(master_edition),
         mint,
         authority,
         payer,
@@ -55,7 +55,7 @@ pub fn create<'info>(
     initialize_mint: bool,
     update_authority_as_signer: bool,
     metadata: AccountInfo<'info>,
-    master_edition: AccountInfo<'info>,
+    master_edition: Option<AccountInfo<'info>>,
     mint: AccountInfo<'info>,
     authority: AccountInfo<'info>,
     payer: AccountInfo<'info>,
@@ -68,7 +68,6 @@ pub fn create<'info>(
     let mut binding = CreateBuilder::new();
     let create_builder = binding
         .metadata(metadata.key())
-        .master_edition(master_edition.key())
         .mint(mint.key())
         .authority(authority.key())
         .payer(payer.key())
@@ -79,19 +78,28 @@ pub fn create<'info>(
         .initialize_mint(initialize_mint)
         .update_authority_as_signer(update_authority_as_signer);
 
-    let create_ix = create_builder.build(args).unwrap().instruction();
+    let mut account_infos = vec![metadata];
 
-    let account_infos = vec![
-        metadata,
-        master_edition,
-        mint,
-        authority,
-        payer,
-        update_authority,
-        system_program,
-        sysvar_instructions,
-        spl_token_program,
-    ];
+    if let Some(master_edition) = master_edition {
+        create_builder.master_edition(master_edition.key());
+        account_infos.push(master_edition);
+    }
+
+    account_infos = [
+        account_infos,
+        vec![
+            mint,
+            authority,
+            payer,
+            update_authority,
+            system_program,
+            sysvar_instructions,
+            spl_token_program,
+        ],
+    ]
+    .concat();
+
+    let create_ix = create_builder.build(args).unwrap().instruction();
 
     if let Some(signer_seeds) = signer_seeds {
         return solana_program::program::invoke_signed(
