@@ -12,5 +12,5 @@ crate-type = ["lib", "cdylib"]
 path = "src/lib.rs"
 
 [dependencies]
-anchor-lang = "0.27.0"
+anchor-lang = "=0.26.0"
 mpl-token-metadata = "1.12.0"
