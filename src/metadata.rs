@@ -295,11 +295,13 @@ pub fn update<'info>(
     token: Option<AccountInfo<'info>>,
     mint: AccountInfo<'info>,
     metadata: AccountInfo<'info>,
-    edition: AccountInfo<'info>,
+    edition: Option<AccountInfo<'info>>,
     authority: AccountInfo<'info>,
     payer: AccountInfo<'info>,
     system_program: AccountInfo<'info>,
     sysvar_instructions: AccountInfo<'info>,
+    authorization_rules_program: Option<AccountInfo<'info>>,
+    authorization_rules: Option<AccountInfo<'info>>,
     signer_seeds: Option<&[&[&[u8]]; 1]>,
 ) -> Result<()> {
     let mut binding = UpdateBuilder::new();
@@ -307,7 +309,6 @@ pub fn update<'info>(
         .authority(authority.key())
         .mint(mint.key())
         .metadata(metadata.key())
-        .edition(edition.key())
         .payer(payer.key())
         .system_program(system_program.key())
         .sysvar_instructions(sysvar_instructions.key());
@@ -324,18 +325,28 @@ pub fn update<'info>(
         account_infos.push(token);
     }
 
+    account_infos = [account_infos, vec![mint, metadata]].concat();
+
+    if let Some(edition) = edition {
+        update_builder.edition(edition.key());
+        account_infos.push(edition);
+    }
+
     account_infos = [
         account_infos,
-        vec![
-            mint,
-            metadata,
-            edition,
-            payer,
-            system_program,
-            sysvar_instructions,
-        ],
+        vec![payer, system_program, sysvar_instructions],
     ]
     .concat();
+
+    if let Some(authorization_rules_program) = authorization_rules_program {
+        update_builder.authorization_rules_program(authorization_rules_program.key());
+        account_infos.push(authorization_rules_program);
+    }
+
+    if let Some(authorization_rules) = authorization_rules {
+        update_builder.authorization_rules(authorization_rules.key());
+        account_infos.push(authorization_rules);
+    }
 
     let update_id = update_builder.build(args).unwrap().instruction();
 
