@@ -7,4 +7,7 @@ pub enum UtilErrors {
 
     #[msg("NFT validation failed")]
     InvalidNFT,
+
+    #[msg("Invalid New Authority Record")]
+    InvalidNewAuthorityRecord,
 }

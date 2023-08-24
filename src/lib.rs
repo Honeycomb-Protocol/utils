@@ -1,10 +1,11 @@
 pub mod bpf_writer;
+pub mod collection;
 pub mod errors;
 pub mod merkle_tree;
 pub mod metadata;
 pub mod traits;
 
-pub use {bpf_writer::*, errors::*, metadata::*, traits::*};
+pub use {bpf_writer::*, collection::*, errors::*, metadata::*, traits::*};
 
 use {
     anchor_lang::{prelude::*, solana_program},

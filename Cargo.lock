@@ -1048,7 +1048,7 @@ dependencies = [
 
 [[package]]
 name = "hpl-utils"
-version = "0.1.8"
+version = "0.2.0-beta.1"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1249,11 +1249,11 @@ dependencies = [
 
 [[package]]
 name = "mpl-token-auth-rules"
-version = "1.4.3"
+version = "1.4.3-beta.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66b1ec5ee0570f688cc84ff4624c5c50732f1a2bfc789f6b34af5b563428d971"
+checksum = "81a34d740606a10a9dac7507d0c9025d72e0ce311c68ae85b6634982cf69a9c6"
 dependencies = [
- "borsh 0.10.3",
+ "borsh 0.9.3",
  "bytemuck",
  "mpl-token-metadata-context-derive 0.2.1",
  "num-derive",
@@ -1268,12 +1268,12 @@ dependencies = [
 
 [[package]]
 name = "mpl-token-metadata"
-version = "2.0.0-beta.1"
+version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3545bd5fe73416f6514cd93899612e0e138619e72df8bc7d19906a12688c69e"
+checksum = "654976568c99887549e1291e7b7e55ae31a70732e56ebb25cb1cdfc08c018333"
 dependencies = [
  "arrayref",
- "borsh 0.10.3",
+ "borsh 0.9.3",
  "mpl-token-auth-rules",
  "mpl-token-metadata-context-derive 0.3.0",
  "mpl-utils",
