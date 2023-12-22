@@ -1,4 +1,4 @@
-use {
+pub use {
     anchor_lang::{prelude::*, solana_program},
     mpl_token_metadata::{
         self,

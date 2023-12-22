@@ -7,12 +7,8 @@ pub mod traits;
 
 pub use {bpf_writer::*, collection::*, errors::*, metadata::*, traits::*};
 
-use {
-    anchor_lang::{prelude::*, solana_program},
-    errors::UtilErrors,
-    mpl_token_metadata::{self, state::Metadata},
-};
-
+pub use {anchor_lang::solana_program, mpl_token_metadata};
+use {errors::UtilErrors, mpl_token_metadata::state::Metadata};
 #[track_caller]
 #[inline(always)]
 pub const fn add_signed(a: usize, b: isize) -> usize {
